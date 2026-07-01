@@ -1,0 +1,75 @@
+{
+"event_id": "20260701_120001_TW",
+"origin_time": "2026-07-01T12:00:01+08:00",
+"update_time": "2026-07-01T12:00:12+08:00",
+"status": "active",
+"consensus": {
+"magnitude": 5.8,
+"lat": 23.85,
+"lon": 121.05,
+"depth_km": 12.8,
+"max_intensity": 5
+},
+"solutions": [
+{
+"algorithm": "eBEAR",
+"magnitude": 5.8,
+"lat": 23.84,
+"lon": 121.06,
+"depth_km": 13.0,
+"max_intensity": 5,
+"latency_sec": 5.2,
+"status": "ok"
+},
+{
+"algorithm": "Visual Seismologist",
+"magnitude": 5.7,
+"lat": 23.86,
+"lon": 121.04,
+"depth_km": 11.8,
+"max_intensity": 5,
+"latency_sec": 6.1,
+"status": "ok"
+},
+{
+"algorithm": "FINDER",
+"magnitude": 5.9,
+"lat": 23.83,
+"lon": 121.03,
+"depth_km": 14.0,
+"max_intensity": 5,
+"latency_sec": 7.4,
+"status": "ok"
+},
+{
+"algorithm": "iPFX",
+"magnitude": 5.6,
+"lat": 23.87,
+"lon": 121.02,
+"depth_km": 12.2,
+"max_intensity": 4,
+"latency_sec": 8.9,
+"status": "ok"
+},
+{
+"algorithm": "NTUST AI",
+"magnitude": 5.8,
+"lat": 23.85,
+"lon": 121.05,
+"depth_km": 12.5,
+"max_intensity": 5,
+"latency_sec": 4.8,
+"status": "ok"
+},
+{
+"algorithm": "Sinica Voronoi",
+"magnitude": 5.7,
+"lat": 23.84,
+"lon": 121.07,
+"depth_km": 13.4,
+"max_intensity": 5,"latency_sec": 9.3,
+"status": "ok"
+}
+],
+"public_note": " 本資料為地震預警系統摘要資訊，僅供展示與研判參考。"
+}
