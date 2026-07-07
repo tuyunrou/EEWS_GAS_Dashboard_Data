@@ -1,23 +1,12 @@
 {
-"update_time": "2026‑07‑01T12:00:30+08:00",
-"systems": [
-{
-"name": "eBEAR",
-"status": "ok",
-"last_update_sec": 3,
-"message": "normal"
-},
-{
-"name": "FINDER",
-"status": "delay",
-"last_update_sec": 18,
-"message": "late update"
-},
-{
-"name": "NTUST AI",
-"status": "ok",
-"last_update_sec": 5,
-"message": "normal"
-}
-]
+  "last_check_time": "2026-07-07 14:50:43",
+  "server_status": "ONLINE",
+  "modules": {
+    "eBEAR_listener": "RUNNING",
+    "FINDER_listener": "RUNNING",
+    "github_pusher": "OK"
+  },
+  "hardware": {
+    "note": "Mac刻部署監控中繼主機"
+  }
 }
