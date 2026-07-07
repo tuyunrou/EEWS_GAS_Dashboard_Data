@@ -1,8 +1,50 @@
 {
     "event_id": "20260707_161500",
-    "update_time": "2026-07-07 16:15:00",
+    "origin_time": "2026-07-07T16:14:55+08:00",
+    "update_time": "2026-07-07 16:15:02",
     "status": "active",
-    "latitude": 24.0,
-    "longitude": 121.6,
-    "max_intensity": "5\u5f37"
+    "hypocenter": {
+        "lat": 24.02,
+        "lon": 121.63,
+        "depth_km": 11.8
+    },
+    "consensus": {
+        "magnitude": 5.8,
+        "max_intensity": "5強"
+    },
+    "solutions": [
+        {
+            "algorithm": "eBEAR",
+            "magnitude": 5.8,
+            "lat": 24.01,
+            "lon": 121.65,
+            "depth_km": 12.0,
+            "max_intensity": "5強",
+            "confidence": 0.88,
+            "latency_sec": 4.2,
+            "status": "OK"
+        },
+        {
+            "algorithm": "FINDER",
+            "magnitude": 5.6,
+            "lat": 24.05,
+            "lon": 121.6,
+            "depth_km": 10.5,
+            "max_intensity": "5弱",
+            "confidence": 0.82,
+            "latency_sec": 5.5,
+            "status": "OK"
+        },
+        {
+            "algorithm": "Visual Seismologist",
+            "magnitude": 5.9,
+            "lat": 23.99,
+            "lon": 121.68,
+            "depth_km": 13.2,
+            "max_intensity": "5強",
+            "confidence": 0.79,
+            "latency_sec": 6.1,
+            "status": "OK"
+        }
+    ]
 }
