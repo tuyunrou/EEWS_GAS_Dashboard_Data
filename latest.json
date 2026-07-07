@@ -1,1 +1,8 @@
-{"event_id": "20260707_142904", "status": "active", "update_time": "2026-07-07 14:29:04.711608"}
+{
+    "event_id": "20260707_161500",
+    "update_time": "2026-07-07 16:15:00",
+    "status": "active",
+    "latitude": 24.0,
+    "longitude": 121.6,
+    "max_intensity": "5\u5f37"
+}
