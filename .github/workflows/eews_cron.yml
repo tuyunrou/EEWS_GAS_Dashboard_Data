@@ -1,0 +1,32 @@
+name: EEWS Automatic Health Check Cron
+
+on:
+  schedule:
+    # 每 5 分鐘在雲端自動執行一次
+    - cron: '*/5 * * * *'
+  workflow_dispatch: # 允許手動點擊執行
+
+jobs:
+  run-health-check:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 1. 複製雲端儲存庫檔案
+      uses: actions/checkout@v3
+
+    - name: 2. 設定 Python 環境
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: 3. 安裝 Requests 套件
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests
+
+    - name: 4. 執行健康檢查與推送更新
+      env:
+        GH_TOKEN: ${{ secrets.MY_GH_TOKEN }}
+        DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+      run: |
+        python health_check.py
