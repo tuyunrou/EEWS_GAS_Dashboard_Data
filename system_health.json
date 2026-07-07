@@ -1,9 +1,12 @@
 {
-    "server_status": "ONLINE",
-    "last_check_time": "2026-07-07 17:47:01",
-    "modules": {
-        "eBEAR_listener": "RUNNING",
-        "FINDER_listener": "RUNNING",
-        "github_pusher": "OK"
-    }
+  "last_check_time": "2026-07-07 11:40:40",
+  "server_status": "ONLINE",
+  "modules": {
+    "eBEAR_listener": "RUNNING",
+    "FINDER_listener": "RUNNING",
+    "github_pusher": "OK"
+  },
+  "hardware": {
+    "note": "MacBook Pro Monitor Host"
+  }
 }
