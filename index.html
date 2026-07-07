@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EEWS 觀測控制台 (24H 雲端維運版)</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: #151d30;
+            --accent-cyan: #00f0ff;
+            --accent-green: #39ff14;
+            --accent-red: #ff3131;
+            --text-color: #e2e8f0;
+            --border-color: #243354;
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container { max-width: 1500px; margin: 0 auto; }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        h1 { margin: 0; font-size: 24px; color: var(--accent-cyan); text-shadow: 0 0 10px rgba(0, 240, 255, 0.3); }
+        .sync-box { text-align: right; }
+        #progress-bar-container { width: 150px; height: 6px; background-color: #243354; border-radius: 3px; margin-top: 5px; overflow: hidden; }
+        #progress-bar { width: 100%; height: 100%; background-color: var(--accent-cyan); transition: width 1s linear; }
+
+        .layout-grid { display: grid; grid-template-columns: 450px 1fr; gap: 25px; margin-bottom: 25px; }
+        .left-column { display: flex; flex-direction: column; gap: 25px; }
+
+        .card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); }
+        .card.alarm { border-color: var(--accent-red); animation: blink 2s infinite; }
+        @keyframes blink { 0%, 100% { box-shadow: 0 0 5px rgba(255, 49, 49, 0.2); } 50% { box-shadow: 0 0 25px rgba(255, 49, 49, 0.6); border-color: #ff6b6b; } }
+
+        .card h2 { margin-top: 0; font-size: 18px; color: #94a3b8; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+
+        .status-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 13px; }
+        .online { background-color: rgba(57, 255, 20, 0.2); color: var(--accent-green); border: 1px solid var(--accent-green); }
+        .offline { background-color: rgba(255, 49, 49, 0.2); color: var(--accent-red); border: 1px solid var(--accent-red); }
+
+        .data-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #1e293b; }
+        .data-label { color: #64748b; font-weight: bold; font-size: 14px; }
+        .data-value { color: #f8fafc; font-size: 15px; }
+        .value-highlight { color: #ffbc00; font-weight: bold; }
+
+        #map-container { height: 500px; border-radius: 12px; border: 1px solid var(--border-color); background: #070a12; }
+
+        .table-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); }
+        table { width: 100%; border-collapse: collapse; text-align: left; margin-top: 15px; font-size: 14px; }
+        th { background-color: #1e293b; color: var(--accent-cyan); padding: 12px; border: 1px solid var(--border-color); font-weight: bold; }
+        td { padding: 12px; border: 1px solid var(--border-color); color: #f8fafc; }
+        tr:nth-child(even) { background-color: #111827; }
+
+        .sub-module { background: #0f172a; padding: 10px; border-radius: 6px; margin-top: 10px; }
+        .sub-item { display: flex; justify-content: space-between; font-size: 13px; margin: 5px 0; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>📡 EEWS 即時觀測、地理與演算法分析控制台</h1>
+        <div class="sync-box">
+            <div id="update-toast">連線中...</div>
+            <div id="progress-bar-container"><div id="progress-bar"></div></div>
+        </div>
+    </header>
+
+    <div class="layout-grid">
+        <div class="left-column">
+            <div id="earthquake-card" class="card">
+                <h2>🚨 最新速報事件 (latest.json)</h2>
+                <div class="data-row"><span class="data-label">EVENT ID</span><span id="event-id" class="data-value">-</span></div>
+                <div class="data-row"><span class="data-label">CONSENSUS MAG</span><span id="event-mag" class="value-highlight" style="color:#ff3131;">-</span></div>
+                <div class="data-row"><span class="data-label">EPICENTER</span><span id="event-loc" class="value-highlight">-</span></div>
+                <div class="data-row"><span class="data-label">TIMESTAMP</span><span id="event-time" class="data-value">-</span></div>
+            </div>
+
+            <div id="server-card" class="card">
+                <h2>🤖 測站健康狀態 (system_health.json)</h2>
+                <div class="data-row"><span class="data-label">HOST STATUS</span><span><span id="server-status" class="status-badge offline">FETCHING</span></span></div>
+                <div class="data-row"><span class="data-label">LAST HEARTBEAT</span><span id="health-time" class="data-value">-</span></div>
+                <div class="sub-module">
+                    <div style="color: #64748b; font-size: 12px; font-weight: bold; margin-bottom: 5px;">MODULES MONITOR</div>
+                    <div class="sub-item"><span>eBEAR Listener:</span><span id="mod-ebear" style="color:var(--accent-cyan)">-</span></div>
+                    <div class="sub-item"><span>FINDER Listener:</span><span id="mod-finder" style="color:var(--accent-cyan)">-</span></div>
+                    <div class="sub-item"><span>GitHub Pusher:</span><span id="mod-pusher" style="color:var(--accent-cyan)">-</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="map-container"></div>
+    </div>
+
+    <div class="table-card">
+        <h2 style="margin-top:0; font-size: 18px; color: #94a3b8; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">📊 各演算法參數即時對比表 (Solutions Comparison)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>演算法 (Algorithm)</th>
+                    <th>規模 (M)</th>
+                    <th>緯度 (Lat)</th>
+                    <th>經度 (Lon)</th>
+                    <th>深度 (Depth)</th>
+                    <th>最大震度</th>
+                    <th>計算延遲 (Latency)</th>
+                    <th>可信度</th>
+                    <th>狀態</th>
+                </tr>
+            </thead>
+            <tbody id="algorithm-table-body">
+                <tr><td colspan="9" style="text-align:center; color:#64748b;">正在載入演算法計算矩陣...</td>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const GITHUB_USER = "tuyunrou";
+    const REPO_NAME = "EEWS_GAS_Dashboard_Data";
+    const REFRESH_INTERVAL = 10;
+    let countdown = REFRESH_INTERVAL;
+
+    // 初始化 Leaflet 地圖
+    const map = L.map('map-container').setView([23.8, 121.2], 7.5);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; CARTO'
+    }).addTo(map);
+
+    let epicenterMarker = null;
+    let gridLayer = null;
+
+    // 💡 安全密鑰優化：抓取公開儲存庫資料，完全不需要傳送 Token headers
+    async function fetchGitHubData(fileName) {
+        const url = `https://raw.githubusercontent.com/${GITHUB_USER}/${REPO_NAME}/main/${fileName}?t=${new Date().getTime()}`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`無法讀取 ${fileName}`);
+        return await response.json();
+    }
+
+    async function updateDashboard() {
+        try {
+            // 1. 抓取最新地震事件
+            const latestData = await fetchGitHubData('latest.json');
+            document.getElementById('event-id').innerText = latestData.event_id || "-";
+            document.getElementById('event-time').innerText = latestData.update_time || "-";
+            
+            if (latestData.consensus) {
+                document.getElementById('event-mag').innerText = `M ${latestData.consensus.magnitude} (預估最大震度: ${latestData.consensus.max_intensity})`;
+            }
+
+            if (latestData.hypocenter) {
+                const lat = latestData.hypocenter.lat;
+                const lon = latestData.hypocenter.lon;
+                document.getElementById('event-loc').innerText = `北緯 ${lat}° / 東經 ${lon}° (深度 ${latestData.hypocenter.depth_km}km)`;
+
+                if (epicenterMarker) map.removeLayer(epicenterMarker);
+                if (gridLayer) map.removeLayer(gridLayer);
+
+                epicenterMarker = L.circleMarker([lat, lon], {
+                    radius: 12, color: '#ff3131', fillColor: '#ff0000', fillOpacity: 0.8, weight: 3
+                }).addTo(map).bindPopup(`<b>🚨 綜合解震央位置</b><br>ID: ${latestData.event_id}<br>座標: ${lat}, ${lon}`).openPopup();
+
+                gridLayer = L.circle([lat, lon], {
+                    radius: 50000, color: '#ffaa00', fillColor: '#ff3131', fillOpacity: 0.2, weight: 2
+                }).addTo(map);
+
+                map.panTo([lat, lon]);
+            }
+
+            const eqCard = document.getElementById('earthquake-card');
+            if(latestData.status === "active") { eqCard.classList.add('alarm'); } else { eqCard.classList.remove('alarm'); }
+
+            // 2. 渲染演算法表格
+            const tbody = document.getElementById('algorithm-table-body');
+            tbody.innerHTML = "";
+
+            if (latestData.solutions && latestData.solutions.length > 0) {
+                latestData.solutions.forEach(sol => {
+                    const row = `<tr>
+                        <td style="color:var(--accent-cyan); font-weight:bold;">${sol.algorithm}</td>
+                        <td style="color:#ffbc00; font-weight:bold;">${sol.magnitude}</td>
+                        <td>${sol.lat}°N</td>
+                        <td>${sol.lon}°E</td>
+                        <td>${sol.depth_km} km</td>
+                        <td><span style="background:rgba(255,49,49,0.1); color:#ff6b6b; padding:2px 6px; border-radius:4px;">${sol.max_intensity}</span></td>
+                        <td>${sol.latency_sec}s</td>
+                        <td>${(sol.confidence * 100).toFixed(0)}%</td>
+                        <td><span class="status-badge online" style="padding:2px 6px; font-size:11px;">${sol.status}</span></td>
+                    </tr>`;
+                    tbody.innerHTML += row;
+                });
+            } else {
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:#64748b;">目前無演算法解對比數據</td></tr>`;
+            }
+
+            // 3. 獲取伺服器健康度
+            const healthData = await fetchGitHubData('system_health.json');
+            const heartbeatStr = healthData.last_check_time;
+            document.getElementById('health-time').innerText = heartbeatStr || "-";
+            
+            const statusBadge = document.getElementById('server-status');
+            let isOnline = healthData.server_status === "ONLINE";
+
+            if (heartbeatStr) {
+                const lastHeartbeat = new Date(heartbeatStr.replace(/-/g, '/'));
+                const now = new Date();
+                const diffMinutes = (now - lastHeartbeat) / 1000 / 60;
+                if (diffMinutes > 3) isOnline = false; // 超過3分鐘未更新判定為失聯
+            }
+
+            if (isOnline) {
+                statusBadge.innerText = "ONLINE"; statusBadge.className = "status-badge online";
+            } else {
+                statusBadge.innerText = "CRITICAL / OFFLINE"; statusBadge.className = "status-badge offline";
+            }
+
+            document.getElementById('mod-ebear').innerText = healthData.modules?.eBEAR_listener || "-";
+            document.getElementById('mod-finder').innerText = healthData.modules?.FINDER_listener || "-";
+            document.getElementById('mod-pusher').innerText = healthData.modules?.github_pusher || "-";
+
+            document.getElementById('update-toast').innerText = `SYS OK // NEXT SYNC IN ${REFRESH_INTERVAL}s`;
+
+        } catch (error) {
+            console.error(error);
+            document.getElementById('update-toast').innerText = "CONNECTION ERROR // RETRYING";
+        }
+    }
+
+    setInterval(() => {
+        countdown--;
+        if (countdown <= 0) { countdown = REFRESH_INTERVAL; updateDashboard(); }
+        document.getElementById('progress-bar').style.width = `${(countdown / REFRESH_INTERVAL) * 100}%`;
+        if(document.getElementById('update-toast').innerText.includes("SYNC")) {
+            document.getElementById('update-toast').innerText = `SYS OK // NEXT SYNC IN ${countdown}s`;
+        }
+    }, 1000);
+
+    updateDashboard();
+</script>
+
+</body>
+</html>
