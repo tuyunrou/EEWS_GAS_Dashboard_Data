@@ -1,9 +1,37 @@
 {
-    "server_status": "ONLINE",
-    "last_check_time": "2026-07-08 10:39:01",
-    "modules": {
-        "eBEAR_listener": "RUNNING",
-        "FINDER_listener": "RUNNING",
-        "github_pusher": "OK"
+  "update_time": "2026-07-08T10:33:00+08:00",
+  "systems": [
+    {
+      "name": "eBEAR",
+      "status": "OK",
+      "last_update_sec": 3,
+      "message": "normal",
+      "uptime": 99.8,
+      "latency_sec": 5.2
+    },
+    {
+      "name": "Visual Seismologist",
+      "status": "OK",
+      "last_update_sec": 5,
+      "message": "normal",
+      "uptime": 99.1,
+      "latency_sec": 6.1
+    },
+    {
+      "name": "FINDER",
+      "status": "Delay",
+      "last_update_sec": 18,
+      "message": "late update",
+      "uptime": 93.4,
+      "latency_sec": 7.4
+    },
+    {
+      "name": "NTUST AI",
+      "status": "Offline",
+      "last_update_sec": 120,
+      "message": "no recent update",
+      "uptime": 86.2,
+      "latency_sec": 0
     }
+  ]
 }
