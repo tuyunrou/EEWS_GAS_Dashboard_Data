@@ -1,0 +1,13 @@
+{
+  "events": [
+    {
+      "event_id": "20260708_0001_TW",
+      "origin_time": "2026-07-08T14:28:12+08:00",
+      "location": "花蓮近海",
+      "magnitude": 5.8,
+      "depth_km": 12.8,
+      "max_intensity": "5強",
+      "algorithm": "Consensus"
+    }
+  ]
+}
